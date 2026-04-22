@@ -18,9 +18,9 @@ const usuarios = [
 const projetos = [];
 
 //
-// 🔐 LOGIN
+// 🔐 LOGIN (CORRIGIDO)
 //
-app.post('/api/login', (req, res) => {
+function fazerLogin(req, res) {
   const { email, senha } = req.body;
 
   const user = usuarios.find(u => u.email === email && u.senha === senha);
@@ -33,7 +33,11 @@ app.post('/api/login', (req, res) => {
     ok: true,
     usuario: user
   });
-});
+}
+
+// aceita os dois caminhos
+app.post('/api/login', fazerLogin);
+app.post('/api/auth/login', fazerLogin);
 
 //
 // 👤 USUÁRIOS
