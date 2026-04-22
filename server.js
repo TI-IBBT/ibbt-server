@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════
 
 const express    = require('express');
-const Database   = require('better-sqlite3');
+//const Database   = require('better-sqlite3');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
 const path       = require('path');
@@ -16,62 +16,74 @@ const JWT_SECRET = process.env.JWT_SECRET || 'ibbt-sgp-secret-2026-trocar-em-pro
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.post('/api/login', (req, res) => {
+  const { usuario, senha } = req.body;
 
+  if (usuario === 'raphael' && senha === '123456') {
+    return res.json({ ok: true, nome: 'Raphael' });
+  }
+
+  if (usuario === 'danielli' && senha === '123456') {
+    return res.json({ ok: true, nome: 'Danielli' });
+  }
+
+  return res.status(401).json({ error: 'Login inválido' });
+});
 // ═══════════════════════════════════════════════
 // BANCO DE DADOS
 // ═══════════════════════════════════════════════
-const db = new Database(path.join(__dirname, 'ibbt.db'));
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+//const db = new Database(path.join(__dirname, 'ibbt.db'));
+//db.pragma('journal_mode = WAL');
+//db.pragma('foreign_keys = ON');
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS usuarios (
-    id          TEXT PRIMARY KEY,
-    nome        TEXT NOT NULL,
-    email       TEXT UNIQUE NOT NULL,
-    senha_hash  TEXT,
-    perfil      TEXT DEFAULT 'membro',
-    ativo       INTEGER DEFAULT 1,
-    primeiro_acesso INTEGER DEFAULT 1,
-    token_temp  TEXT,
-    criado_em   TEXT NOT NULL,
-    criado_por  TEXT
+//db.exec(`
+  //CREATE TABLE IF NOT EXISTS usuarios (
+    //id          TEXT PRIMARY KEY,
+    //nome        TEXT NOT NULL,
+    //email       TEXT UNIQUE NOT NULL,
+    //senha_hash  TEXT,
+    //perfil      TEXT DEFAULT 'membro',
+    //ativo       INTEGER DEFAULT 1,
+    //primeiro_acesso INTEGER DEFAULT 1,
+    //token_temp  TEXT,
+    //criado_em   TEXT NOT NULL,
+    //criado_por  TEXT
   );
 
-  CREATE TABLE IF NOT EXISTS projetos (
-    id           TEXT PRIMARY KEY,
-    dados        TEXT NOT NULL,
-    criado_em    TEXT NOT NULL,
-    criado_por   TEXT NOT NULL,
-    criado_nome  TEXT NOT NULL,
-    atualizado_em   TEXT,
-    atualizado_por  TEXT,
-    atualizado_nome TEXT
+  //CREATE TABLE IF NOT EXISTS projetos (
+    //id           TEXT PRIMARY KEY,
+    //dados        TEXT NOT NULL,
+    //criado_em    TEXT NOT NULL,
+    //criado_por   TEXT NOT NULL,
+    //criado_nome  TEXT NOT NULL,
+    //atualizado_em   TEXT,
+    //atualizado_por  TEXT,
+    //atualizado_nome TEXT
   );
 
-  CREATE TABLE IF NOT EXISTS audit_log (
-    id           TEXT PRIMARY KEY,
-    projeto_id   TEXT,
-    projeto_nome TEXT,
-    acao         TEXT NOT NULL,
-    descricao    TEXT,
-    usuario_id   TEXT NOT NULL,
-    usuario_nome TEXT NOT NULL,
-    timestamp    TEXT NOT NULL
+  //CREATE TABLE IF NOT EXISTS audit_log (
+    //id           TEXT PRIMARY KEY,
+    //projeto_id   TEXT,
+    //projeto_nome TEXT,
+    //acao         TEXT NOT NULL,
+    //descricao    TEXT,
+    //usuario_id   TEXT NOT NULL,
+    //usuario_nome TEXT NOT NULL,
+    //timestamp    TEXT NOT NULL
   );
-`);
+//`);
 
 // Criar admin padrão se não existir
-const adminExiste = db.prepare('SELECT id FROM usuarios WHERE perfil IN (?,?)').get('admin','diretoria');
-if (!adminExiste) {
-  const agora = new Date().toISOString();
-  const adminHash = bcrypt.hashSync('ibbt@2026', 10);
-  db.prepare(`INSERT INTO usuarios (id,nome,email,senha_hash,perfil,ativo,primeiro_acesso,criado_em) VALUES (?,?,?,?,?,1,0,?)`)
-    .run('U001','Danielli','danielli@ibbt.com.br', adminHash, 'admin', agora);
-  db.prepare(`INSERT INTO usuarios (id,nome,email,senha_hash,perfil,ativo,primeiro_acesso,criado_em) VALUES (?,?,?,?,?,1,0,?)`)
-    .run('U002','Raphael','raphael@ibbt.com.br', adminHash, 'diretoria', agora);
-  console.log('✅ Usuários admin criados: danielli@ibbt.com.br / ibbt@2026');
-}
+//const adminExiste = db.prepare('SELECT id FROM usuarios WHERE perfil IN (?,?)').get('admin','diretoria');
+//if (!adminExiste) {
+  //const agora = new Date().toISOString();
+  //const adminHash = bcrypt.hashSync('ibbt@2026', 10);
+  //db.prepare(`INSERT INTO usuarios (id,nome,email,senha_hash,perfil,ativo,primeiro_acesso,criado_em) VALUES (?,?,?,?,?,1,0,?)`)
+    //.run('U001','Danielli','danielli@ibbt.com.br', adminHash, 'admin', agora);
+  //db.prepare(`INSERT INTO usuarios (id,nome,email,senha_hash,perfil,ativo,primeiro_acesso,criado_em) VALUES (?,?,?,?,?,1,0,?)`)
+    //.run('U002','Raphael','raphael@ibbt.com.br', adminHash, 'diretoria', agora);
+  //console.log('✅ Usuários admin criados: danielli@ibbt.com.br / ibbt@2026');
+//}
 
 // ═══════════════════════════════════════════════
 // REAL-TIME (Server-Sent Events)
